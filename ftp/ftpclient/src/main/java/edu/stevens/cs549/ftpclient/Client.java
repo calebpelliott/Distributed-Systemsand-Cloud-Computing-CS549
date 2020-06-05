@@ -422,7 +422,7 @@ public class Client {
 					} else if (mode == Mode.ACTIVE) {
 						FileInputStream f = new FileInputStream(inputs[1]);
 						new Thread(new PutThread(dataChan, f)).start();
-						svr.get(inputs[1]);
+						svr.put(inputs[1]);
 					} else {
 						msgln("GET: No mode set--use port or pasv command.");
 					}
