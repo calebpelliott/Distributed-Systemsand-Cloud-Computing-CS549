@@ -42,7 +42,7 @@ public class Client {
 	private static String clientPropsFile = "/client.properties";
 	private static String loggerPropsFile = "/log4j.properties";
 
-	protected String clientIp;
+	protected static String clientIp;
 	
 	protected String serverAddr;
 	
@@ -87,11 +87,11 @@ public class Client {
 		while (keys.hasMoreElements()) {
 			String k = keys.nextElement();
 			if ("clientIp".equals(k))
-				clientIp = opts.get("host");
+				clientIp = opts.get("clientIp");
 			else if ("serverAddr".equals(k))
 				serverAddr = opts.get("serverAddr");
 			else if ("serverPort".equals(k))
-				serverPort = Integer.parseInt(opts.get("http"));
+				serverPort = Integer.parseInt(opts.get("serverPort"));
 			else
 				severe("Unrecognized option: --" + k);
 		}
@@ -224,6 +224,8 @@ public class Client {
 
 		private IServer svr;
 		
+		private final int BACKLOG_LENGTH = 5;
+		
 		private InetAddress serverAddress;
 
 		Dispatch(IServer s, InetAddress sa) {
@@ -267,7 +269,8 @@ public class Client {
 		private ServerSocket dataChan = null;
 
 		private InetSocketAddress makeActive() throws IOException {
-			dataChan = new ServerSocket(0);
+			InetAddress myAddr = InetAddress.getByName(clientIp);
+			dataChan = new ServerSocket(0, BACKLOG_LENGTH, myAddr);
 			mode = Mode.ACTIVE;
 			/* 
 			 * Note: this only works (for the server) if the client is not behind a NAT.

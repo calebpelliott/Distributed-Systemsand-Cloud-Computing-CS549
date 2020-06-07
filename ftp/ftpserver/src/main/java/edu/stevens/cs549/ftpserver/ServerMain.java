@@ -65,9 +65,9 @@ public class ServerMain {
 		while (keys.hasMoreElements()) {
 			String k = keys.nextElement();
 			if ("serverIp".equals(k))
-				serverIp = opts.get("host");
+				serverIp = opts.get("serverIp");
 			else if ("serverPort".equals(k))
-				serverPort = Integer.parseInt(opts.get("http"));
+				serverPort = Integer.parseInt(opts.get("serverPort"));
 			else
 				severe("Unrecognized option: --" + k);
 		}
