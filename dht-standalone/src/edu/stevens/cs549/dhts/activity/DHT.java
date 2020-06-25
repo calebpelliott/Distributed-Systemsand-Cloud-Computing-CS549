@@ -114,7 +114,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			return getSucc();
 		} else {
 			// TODO: Do the Web service call.
-
+			return client.getSucc(info);			
 		}
 	}
 
@@ -149,6 +149,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			/*
 			 * TODO: Do the Web service call
 			 */
+			return client.getPred(info);
 			
 		}
 	}
@@ -182,6 +183,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 				/*
 				 * TODO: Do the Web service call to the remote node.
 				 */
+				return client.closestPrecedingFinger(info, id);
 				
 			} else {
 				/*
@@ -469,6 +471,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			 * 
 			 * TODO: Do the Web service call.
 			 */
+			return client.get(n, k);
 			
 		}
 	}

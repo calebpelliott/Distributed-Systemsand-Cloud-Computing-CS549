@@ -178,6 +178,7 @@ public class State implements IState, IRouting {
 		/*
 		 * TODO: Get the ith finger.
 		 */
+		return null;
 		
 	}
 
@@ -186,6 +187,7 @@ public class State implements IState, IRouting {
 		 * TODO: Get closest preceding finger for id, to continue search at that
 		 * node. Hint: See DHTBase.inInterval()
 		 */
+		return null;
 
 	}
 

@@ -60,7 +60,17 @@ public class WebClient {
 
 	private Response putRequest(URI uri, Entity<?> entity) {
 		// TODO
-		
+		try {
+			Response cr = client.target(uri)
+					.request(MediaType.APPLICATION_XML_TYPE)
+					.header(Time.TIME_STAMP, Time.advanceTime())
+					.put(entity);
+			processResponseTimestamp(cr);
+			return cr;
+		} catch (Exception e) {
+			error("Exception during PUT request: " + e);
+			return null;
+		}
 	}
 	
 	private Response putRequest(URI uri) {
@@ -100,6 +110,29 @@ public class WebClient {
 			NodeInfo pred = response.readEntity(nodeInfoType).getValue();
 			return pred;
 		}
+	}
+	
+	/*
+	 * Get the successor pointer at a node
+	 */
+	public NodeInfo getSucc(NodeInfo node) throws DHTBase.Failed{
+		// TODO
+		return null;
+	}
+	
+	public NodeInfo findSuccessor(URI addr, int i) {
+		// TODO
+		return null;
+	}
+	
+	public NodeInfo closestPrecedingFinger(NodeInfo node, int id) {
+		// TODO
+		return null;
+	}
+	
+	public String[] get(NodeInfo node, String key) {
+		// TODO
+		return null;
 	}
 
 	/*
