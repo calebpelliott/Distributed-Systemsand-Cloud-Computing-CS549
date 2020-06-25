@@ -113,7 +113,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		if (localInfo.addr.equals(info.addr)) {
 			return getSucc();
 		} else {
-			// TODO: Do the Web service call
+			// TODO: Do the Web service call.
 
 		}
 	}
