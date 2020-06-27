@@ -320,7 +320,7 @@ public class CliClient {
 					err(e);
 				}
 			else
-				msgln("Usage: insert <uri>");
+				msgln("Usage: join <uri>");
 		}
 
 	}

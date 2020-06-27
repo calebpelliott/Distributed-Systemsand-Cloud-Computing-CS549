@@ -51,6 +51,13 @@ public class NodeResource {
 	public Response getPred() {
 		return new NodeService(headers, uriInfo).getPred();
 	}
+	
+	@GET
+	@Path("succ")
+	@Produces("application/xml")
+	public Response getSucc() {
+		return new NodeService(headers, uriInfo).getSucc();
+	}
 
 	@PUT
 	@Path("notify")
@@ -73,6 +80,14 @@ public class NodeResource {
 	public Response findSuccessor(@QueryParam("id") String index) {
 		int id = Integer.parseInt(index);
 		return new NodeService(headers, uriInfo).findSuccessor(id);
+	}
+	
+	@GET
+	@Path("finger")
+	@Produces("application/xml")
+	public Response findFinger(@QueryParam("id") String index) {
+		int id = Integer.parseInt(index);
+		return new NodeService(headers, uriInfo).findPreceedFinger(id);
 	}
 
 }

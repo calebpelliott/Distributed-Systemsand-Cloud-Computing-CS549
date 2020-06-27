@@ -12,6 +12,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.JAXBElement;
 
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+
 import edu.stevens.cs549.dhts.activity.DHTBase;
 import edu.stevens.cs549.dhts.activity.NodeInfo;
 import edu.stevens.cs549.dhts.resource.TableRep;
@@ -51,6 +54,7 @@ public class WebClient {
 					.header(Time.TIME_STAMP, Time.advanceTime())
 					.get();
 			processResponseTimestamp(cr);
+			String s = (String) cr.readEntity(String.class);
 			return cr;
 		} catch (Exception e) {
 			error("Exception during GET request: " + e);
@@ -120,8 +124,10 @@ public class WebClient {
 		return null;
 	}
 	
-	public NodeInfo findSuccessor(URI addr, int i) {
+	public NodeInfo findSuccessor(NodeInfo node) {
 		// TODO
+		UriBuilder ub = UriBuilder.fromUri(node.addr).path("find");
+				URI uri = UriBuilder.fromUri(node.addr).path("info").build();
 		return null;
 	}
 	
@@ -131,6 +137,11 @@ public class WebClient {
 	}
 	
 	public String[] get(NodeInfo node, String key) {
+		// TODO
+		return null;
+	}
+	
+	public NodeInfo delete(NodeInfo n, String k, String v) {
 		// TODO
 		return null;
 	}

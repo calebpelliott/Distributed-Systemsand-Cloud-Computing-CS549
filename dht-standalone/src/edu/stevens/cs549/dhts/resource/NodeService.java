@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -95,6 +96,12 @@ public class NodeService {
 		info("getPred()");
 		return response(dht.getPred());
 	}
+	
+	public Response getSucc() {
+		advanceTime();
+		info("getSucc()");
+		return response(dht.getSucc());
+	}
 
 	public Response notify(TableRep predDb) {
 		advanceTime();
@@ -121,6 +128,12 @@ public class NodeService {
 		} catch (Failed e) {
 			throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
 		}
+	}
+	
+	public Response findPreceedFinger(int id) {
+		advanceTime();
+		info("findPreceedFinger()");
+		return response(dht.closestPrecedingFinger(id));
 	}
 	
 }

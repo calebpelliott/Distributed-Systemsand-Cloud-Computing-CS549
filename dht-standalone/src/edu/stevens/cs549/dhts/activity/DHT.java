@@ -552,6 +552,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			/*
 			 * TODO: Do the Web service call.
 			 */
+			client.delete(n, k, v);
 			
 		}
 	}
@@ -637,6 +638,10 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 * that it keeps its own bindings, to which it adds those it transfers
 		 * from us.
 		 */
+		state.clear();
+		succ = client.getSucc(info);
+		setSucc(succ);
+		stabilize();
 
 	
 	}
