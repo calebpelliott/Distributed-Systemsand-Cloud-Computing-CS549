@@ -499,6 +499,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			/*
 			 * TODO: Do the Web service call.
 			 */
+			client.addBinding(n, k, v);
 			
 		}
 	}
@@ -639,11 +640,17 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 * from us.
 		 */
 		state.clear();
-		succ = client.getSucc(info);
-		setSucc(succ);
-		stabilize();
-
-	
+		try {
+			succ = findSuccessor(new URI(uri), info.id);
+			setSucc(succ);
+			stabilize();
+		} catch (Failed e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/*

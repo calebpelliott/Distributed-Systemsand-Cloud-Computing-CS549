@@ -134,7 +134,7 @@ public class Main {
 			httpPort = Integer.parseInt((String) props.getProperty("server.port.http", "8080"));
 			host = (String) props.getProperty("server.host", "localhost");
 
-			nodeId = new Random().nextInt(IRouting.NKEYS);
+			nodeId = 1;
 
 			/*
 			 * Properties may be overridden by command line options.

@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import edu.stevens.cs549.dhts.activity.DHTBase;
+import edu.stevens.cs549.dhts.activity.DHTBase.Failed;
 import edu.stevens.cs549.dhts.activity.NodeInfo;
 import edu.stevens.cs549.dhts.resource.TableRep;
 
@@ -22,7 +23,7 @@ public class State implements IState, IRouting {
 	static final long serialVersionUID = 0L;
 
 	public static Logger log = Logger.getLogger(State.class.getCanonicalName());
-	
+
 	protected NodeInfo info;
 
 	public State(NodeInfo info) {
@@ -171,15 +172,16 @@ public class State implements IState, IRouting {
 		/*
 		 * TODO: Set the ith finger.
 		 */
-		
+		finger[i] = info;
+
 	}
 
 	public synchronized NodeInfo getFinger(int i) {
 		/*
 		 * TODO: Get the ith finger.
 		 */
-		return null;
-		
+		return finger[i];
+
 	}
 
 	public synchronized NodeInfo closestPrecedingFinger(int id) {
@@ -187,8 +189,20 @@ public class State implements IState, IRouting {
 		 * TODO: Get closest preceding finger for id, to continue search at that
 		 * node. Hint: See DHTBase.inInterval()
 		 */
-		return null;
-
+		for (int i = 0, exp = 1; i < IRouting.NFINGERS; i++, exp = 2 * exp) {
+			/*if (DHTBase.inInterval(id, finger[i].id, finger[(i + 1) % (IRouting.NKEYS)].id)) {
+				//System.out.println("id: " + id + " LB: " + finger[i].id + " UB: " + finger[(i + 1) % (IRouting.NFINGERS)].id);
+				return getFinger(i);
+			}*/
+			if (DHTBase.inInterval(
+			id, 
+			(info.id + exp) % IRouting.NKEYS, 
+			(info.id + (exp%64)*2) % IRouting.NKEYS)) {
+				return getFinger(i);
+			}
+		}
+		
+		return getFinger(IRouting.NFINGERS);
 	}
 
 	public synchronized void routes() {
@@ -204,24 +218,21 @@ public class State implements IState, IRouting {
 		}
 		wr.flush();
 	}
-	
-	
+
 	/*
 	 * Used to prevent a race condition in the join protocol.
 	 */
-	
+
 	public static enum JoinState {
-		NOT_JOINED,
-		JOINING,
-		JOINED
+		NOT_JOINED, JOINING, JOINED
 	}
-	
+
 	private JoinState joinState = JoinState.NOT_JOINED;
-	
+
 	private Lock joinStateLock = new ReentrantLock();
-	
+
 	private Condition joined = joinStateLock.newCondition();
-	
+
 	public void startJoin() {
 		joinStateLock.lock();
 		try {
@@ -230,10 +241,10 @@ public class State implements IState, IRouting {
 			joinStateLock.unlock();
 		}
 	}
-	
+
 	public void joinCheck() {
 		// Called by any operations that should block during join protocol.
-		// Currently that is getPred() (for the case where we are joining a 
+		// Currently that is getPred() (for the case where we are joining a
 		// single-node network).
 		joinStateLock.lock();
 		try {
@@ -246,7 +257,7 @@ public class State implements IState, IRouting {
 			joinStateLock.unlock();
 		}
 	}
-	
+
 	public void finishJoin() {
 		joinStateLock.lock();
 		try {
@@ -256,5 +267,5 @@ public class State implements IState, IRouting {
 			joinStateLock.unlock();
 		}
 	}
-	
+
 }

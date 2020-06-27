@@ -12,9 +12,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.JAXBElement;
 
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import edu.stevens.cs549.dhts.activity.DHTBase;
 import edu.stevens.cs549.dhts.activity.NodeInfo;
 import edu.stevens.cs549.dhts.resource.TableRep;
@@ -54,7 +51,7 @@ public class WebClient {
 					.header(Time.TIME_STAMP, Time.advanceTime())
 					.get();
 			processResponseTimestamp(cr);
-			String s = (String) cr.readEntity(String.class);
+			//String s = (String) cr.readEntity(String.class);
 			return cr;
 		} catch (Exception e) {
 			error("Exception during GET request: " + e);
@@ -120,29 +117,64 @@ public class WebClient {
 	 * Get the successor pointer at a node
 	 */
 	public NodeInfo getSucc(NodeInfo node) throws DHTBase.Failed{
-		// TODO
-		return null;
+		URI succPath = UriBuilder.fromUri(node.addr).path("succ").build();
+		info("client getSucc(" + succPath + ")");
+		Response response = getRequest(succPath);
+		if (response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /succ");
+		} else {
+			NodeInfo succ = response.readEntity(nodeInfoType).getValue();
+			return succ;
+		}
 	}
 	
-	public NodeInfo findSuccessor(NodeInfo node) {
-		// TODO
-		UriBuilder ub = UriBuilder.fromUri(node.addr).path("find");
-				URI uri = UriBuilder.fromUri(node.addr).path("info").build();
-		return null;
+	public NodeInfo findSuccessor(URI addr, int id) throws DHTBase.Failed{
+
+		UriBuilder ub = UriBuilder.fromUri(addr).path("find");
+		URI findPath = ub.queryParam("id", id).build();
+		info("client findSuccessor(" + findPath + ")");
+		Response response = getRequest(findPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /find");
+		}else {
+			NodeInfo succ = response.readEntity(nodeInfoType).getValue();
+			return succ;
+		}
 	}
 	
-	public NodeInfo closestPrecedingFinger(NodeInfo node, int id) {
-		// TODO
-		return null;
+	public NodeInfo closestPrecedingFinger(NodeInfo node, int id) throws DHTBase.Failed{
+		UriBuilder ub = UriBuilder.fromUri(node.addr).path("finger");
+		URI fingerPath = ub.queryParam("id", id).build();
+		info("client closestPrecedingFinger(" + fingerPath + ")");
+		Response response = getRequest(fingerPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /finger");
+		}else {
+			NodeInfo prec = response.readEntity(nodeInfoType).getValue();
+			return prec;
+		}
 	}
 	
 	public String[] get(NodeInfo node, String key) {
-		// TODO
+		//TODO
+		int x = 5/0;
 		return null;
+	}
+	
+	public void addBinding(NodeInfo n, String k, String v) throws DHTBase.Failed{
+		UriBuilder ub = UriBuilder.fromUri(n.addr);
+		URI addPath = ub.queryParam("key", k).queryParam("val", v).build();
+		info("client addBinding(" + addPath + ")");
+		Response response = putRequest(addPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("PUT /dht");
+		}
 	}
 	
 	public NodeInfo delete(NodeInfo n, String k, String v) {
 		// TODO
+		//TODO
+		int x = 5/0;
 		return null;
 	}
 

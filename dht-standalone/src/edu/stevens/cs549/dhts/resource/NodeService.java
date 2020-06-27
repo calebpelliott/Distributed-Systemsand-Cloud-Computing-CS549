@@ -113,6 +113,19 @@ public class NodeService {
 			return response(db);
 		}
 	}
+	
+	public Response add(String k, String v) {
+		advanceTime();
+		info("add()");
+		try {
+			dht.add(k, v);
+			return response();
+		} catch (Invalid e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return responseNull();
+		}
+	}
 
 	public static final QName nsTableRow = new QName(ns, "TableRow");
 
