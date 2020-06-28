@@ -80,6 +80,17 @@ public class NodeResource {
 		return new NodeService(headers, uriInfo).add(k, v);
 	}
 	
+	@DELETE
+	public Response delKeyValue(@QueryParam("key") String k, @QueryParam("val") String v) {
+		return new NodeService(headers, uriInfo).del(k, v);
+	}
+	
+	@GET
+	@Produces("application/json")
+	public Response getKeyValue(@QueryParam("key") String k) {
+		return new NodeService(headers, uriInfo).get(k);
+	}
+	
 	@GET
 	@Path("find")
 	@Produces("application/xml")

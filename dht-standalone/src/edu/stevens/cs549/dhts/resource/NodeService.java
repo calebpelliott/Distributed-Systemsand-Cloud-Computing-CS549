@@ -1,8 +1,10 @@
 package edu.stevens.cs549.dhts.resource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -76,6 +78,11 @@ public class NodeService {
 	private Response response(TableRow r) {
 		return Response.ok(tableRowRep(r)).header(Time.TIME_STAMP, Time.advanceTime()).build();
 	}
+	
+	private Response response(String[] s) {
+		List<String> list = Arrays.asList(s);
+		return Response.ok(list.toString()).header(Time.TIME_STAMP, Time.advanceTime()).build();
+	}
 
 	private Response responseNull() {
 		return Response.notModified().header(Time.TIME_STAMP, Time.advanceTime()).build();
@@ -120,6 +127,36 @@ public class NodeService {
 		try {
 			dht.add(k, v);
 			return response();
+		} catch (Invalid e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return responseNull();
+		}
+	}
+	
+	public Response del(String k, String v) {
+		advanceTime();
+		info("del()");
+		try {
+			dht.delete(k, v);
+			return response();
+		} catch (Invalid e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return responseNull();
+		}
+	}
+	
+	public Response get(String k) {
+		advanceTime();
+		info("get()");
+		try {
+			String[] bindings = dht.get(k);
+			if (bindings == null) {
+				return responseNull();
+			}else {
+				return response(bindings);
+			}
 		} catch (Invalid e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
