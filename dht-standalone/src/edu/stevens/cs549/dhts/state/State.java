@@ -170,7 +170,7 @@ public class State implements IState, IRouting {
 
 	public synchronized void setFinger(int i, NodeInfo info) {
 		/*
-		 * TODO: Set the ith finger.
+		 * Set the ith finger.
 		 */
 		finger[i] = info;
 
@@ -178,7 +178,7 @@ public class State implements IState, IRouting {
 
 	public synchronized NodeInfo getFinger(int i) {
 		/*
-		 * TODO: Get the ith finger.
+		 * Get the ith finger.
 		 */
 		return finger[i];
 
@@ -186,12 +186,11 @@ public class State implements IState, IRouting {
 
 	public synchronized NodeInfo closestPrecedingFinger(int id) {
 		/*
-		 * TODO: Get closest preceding finger for id, to continue search at that
-		 * node. Hint: See DHTBase.inInterval()
+		 * Get closest preceding finger for id, to continue search at that
+		 * node.
 		 */
 		for (int i = 0; i < IRouting.NFINGERS; i++) {
 			if (DHTBase.inInterval(id, finger[i].id, finger[(i + 1) % (IRouting.NFINGERS)].id)) {
-				//System.out.println("id: " + id + " LB: " + finger[i].id + " UB: " + finger[(i + 1) % (IRouting.NFINGERS)].id);
 				return getFinger(i);
 			}
 		}

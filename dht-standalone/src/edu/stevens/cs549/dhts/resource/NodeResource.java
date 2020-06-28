@@ -20,8 +20,6 @@ public class NodeResource {
 
 	/*
 	 * Web service API.
-	 * 
-	 * TODO: Fill in the missing operations.
 	 */
 
 	Logger log = Logger.getLogger(NodeResource.class.getCanonicalName());

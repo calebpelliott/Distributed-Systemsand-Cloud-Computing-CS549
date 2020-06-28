@@ -36,7 +36,6 @@ import edu.stevens.cs549.dhts.main.Time;
 
 public class NodeService {
 	
-	// TODO: add the missing operations
 
 	HttpHeaders headers;
 
@@ -128,7 +127,6 @@ public class NodeService {
 			dht.add(k, v);
 			return response();
 		} catch (Invalid e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return responseNull();
 		}
@@ -141,7 +139,6 @@ public class NodeService {
 			dht.delete(k, v);
 			return response();
 		} catch (Invalid e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return responseNull();
 		}
@@ -158,7 +155,6 @@ public class NodeService {
 				return response(bindings);
 			}
 		} catch (Invalid e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return responseNull();
 		}

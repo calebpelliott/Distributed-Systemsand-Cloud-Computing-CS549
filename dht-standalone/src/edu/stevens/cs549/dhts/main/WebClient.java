@@ -28,8 +28,6 @@ public class WebClient {
 
 	/*
 	 * Encapsulate Web client operations here.
-	 * 
-	 * TODO: Fill in missing operations.
 	 */
 
 	/*
