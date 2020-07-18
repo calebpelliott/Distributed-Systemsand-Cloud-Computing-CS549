@@ -113,8 +113,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		if (localInfo.addr.equals(info.addr)) {
 			return getSucc();
 		} else {
-			// TODO: Do the Web service call
-
+			return client.getSucc(info);			
 		}
 	}
 
@@ -146,9 +145,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		if (localInfo.addr.equals(info.addr)) {
 			return getPred();
 		} else {
-			/*
-			 * TODO: Do the Web service call
-			 */
+			return client.getPred(info);
 			
 		}
 	}
@@ -179,9 +176,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			return closestPrecedingFinger(id);
 		} else {
 			if (IRouting.USE_FINGER_TABLE) {
-				/*
-				 * TODO: Do the Web service call to the remote node.
-				 */
+				return client.closestPrecedingFinger(info, id);
 				
 			} else {
 				/*
@@ -466,9 +461,8 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		} else {
 			/*
 			 * Retrieve the bindings at the specified node.
-			 * 
-			 * TODO: Do the Web service call.
 			 */
+			return client.get(n, k);
 			
 		}
 	}
@@ -493,9 +487,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 				throw new IllegalArgumentException(e);
 			}
 		} else {
-			/*
-			 * TODO: Do the Web service call.
-			 */
+			client.addBinding(n, k, v);
 			
 		}
 	}
@@ -546,9 +538,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 				throw new IllegalArgumentException(e);
 			}
 		} else {
-			/*
-			 * TODO: Do the Web service call.
-			 */
+			client.delete(n, k, v);
 			
 		}
 	}
@@ -619,7 +609,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		NodeInfo info = getNodeInfo();
 		NodeInfo succ;
 		/*
-		 * TODO: Do a web service call to the node identified by "uri" and find
+		 * Do a web service call to the node identified by "uri" and find
 		 * the successor of info.id, then setSucc(succ). Make sure to clear any
 		 * local bindings first of all, to maintain consistency of the ring. We
 		 * start afresh with the bindings that are transferred from the new
@@ -634,8 +624,16 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 * that it keeps its own bindings, to which it adds those it transfers
 		 * from us.
 		 */
-
-	
+		state.clear();
+		try {
+			succ = findSuccessor(new URI(uri), info.id);
+			setSucc(succ);
+			stabilize();
+		} catch (Failed e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*

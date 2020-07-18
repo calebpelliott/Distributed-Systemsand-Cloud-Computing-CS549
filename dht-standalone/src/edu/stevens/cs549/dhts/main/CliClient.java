@@ -100,7 +100,7 @@ public class CliClient {
 						d.routes(inputs);
 					else if ("ping".equals(cmd))
 						d.ping(inputs);
-					else if ("silent".equals(cmd))
+					else if ("background".equals(cmd))
 						d.background(inputs);
 					else if ("debug".equals(cmd))
 						d.debug(inputs);
@@ -320,7 +320,7 @@ public class CliClient {
 					err(e);
 				}
 			else
-				msgln("Usage: insert <uri>");
+				msgln("Usage: join <uri>");
 		}
 
 	}

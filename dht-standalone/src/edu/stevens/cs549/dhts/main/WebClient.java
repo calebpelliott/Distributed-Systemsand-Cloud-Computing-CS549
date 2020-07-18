@@ -1,6 +1,7 @@
 package edu.stevens.cs549.dhts.main;
 
 import java.net.URI;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
@@ -27,8 +28,6 @@ public class WebClient {
 
 	/*
 	 * Encapsulate Web client operations here.
-	 * 
-	 * TODO: Fill in missing operations.
 	 */
 
 	/*
@@ -57,14 +56,51 @@ public class WebClient {
 			return null;
 		}
 	}
+	
+	private Response getRequestJSON(URI uri) {
+		try {
+			Response cr = client.target(uri)
+					.request(MediaType.APPLICATION_JSON)
+					.header(Time.TIME_STAMP, Time.advanceTime())
+					.get();
+			processResponseTimestamp(cr);
+			return cr;
+		} catch (Exception e) {
+			error("Exception during GET request: " + e);
+			return null;
+		}
+	}
 
 	private Response putRequest(URI uri, Entity<?> entity) {
-		// TODO
-		
+		try {
+			Response cr = client.target(uri)
+					.request(MediaType.APPLICATION_XML_TYPE)
+					.header(Time.TIME_STAMP, Time.advanceTime())
+					.put(entity);
+			processResponseTimestamp(cr);
+			return cr;
+		} catch (Exception e) {
+			error("Exception during PUT request: " + e);
+			return null;
+		}
 	}
 	
 	private Response putRequest(URI uri) {
 		return putRequest(uri, Entity.text(""));
+	}
+	
+	private Response delRequest(URI uri) {
+		try {
+			Response cr = client.target(uri)
+					.request(MediaType.APPLICATION_XML_TYPE)
+					.header(Time.TIME_STAMP, Time.advanceTime())
+					.delete();
+			processResponseTimestamp(cr);
+			return cr;
+		} catch (Exception e) {
+			error("Exception during DEL request: " + e);
+			return null;
+		}
 	}
 
 	private void processResponseTimestamp(Response cr) {
@@ -77,7 +113,7 @@ public class WebClient {
 	 */
 	private GenericType<JAXBElement<NodeInfo>> nodeInfoType = new GenericType<JAXBElement<NodeInfo>>() {
 	};
-
+	
 	/*
 	 * Ping a remote site to see if it is still available.
 	 */
@@ -99,6 +135,85 @@ public class WebClient {
 		} else {
 			NodeInfo pred = response.readEntity(nodeInfoType).getValue();
 			return pred;
+		}
+	}
+	
+	/*
+	 * Get the successor pointer at a node
+	 */
+	public NodeInfo getSucc(NodeInfo node) throws DHTBase.Failed{
+		URI succPath = UriBuilder.fromUri(node.addr).path("succ").build();
+		info("client getSucc(" + succPath + ")");
+		Response response = getRequest(succPath);
+		if (response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /succ");
+		} else {
+			NodeInfo succ = response.readEntity(nodeInfoType).getValue();
+			return succ;
+		}
+	}
+	
+	public NodeInfo findSuccessor(URI addr, int id) throws DHTBase.Failed{
+
+		UriBuilder ub = UriBuilder.fromUri(addr).path("find");
+		URI findPath = ub.queryParam("id", id).build();
+		info("client findSuccessor(" + findPath + ")");
+		Response response = getRequest(findPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /find");
+		}else {
+			NodeInfo succ = response.readEntity(nodeInfoType).getValue();
+			return succ;
+		}
+	}
+	
+	public NodeInfo closestPrecedingFinger(NodeInfo node, int id) throws DHTBase.Failed{
+		UriBuilder ub = UriBuilder.fromUri(node.addr).path("finger");
+		URI fingerPath = ub.queryParam("id", id).build();
+		info("client closestPrecedingFinger(" + fingerPath + ")");
+		Response response = getRequest(fingerPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /finger");
+		}else {
+			NodeInfo prec = response.readEntity(nodeInfoType).getValue();
+			return prec;
+		}
+	}
+	
+	public String[] get(NodeInfo node, String key) throws DHTBase.Failed{
+		UriBuilder ub = UriBuilder.fromUri(node.addr);
+		URI getPath = ub.queryParam("key", key).build();
+		info("client get(" + getPath + ")");
+		Response response = getRequestJSON(getPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("GET /dht");
+		}else {
+			String s = response.readEntity(String.class);
+			s = s.replace("[", "");
+			s = s.replace("]", "");
+			String[] bindings = s.split(",");
+			
+			return bindings;
+		}
+	}
+	
+	public void addBinding(NodeInfo n, String k, String v) throws DHTBase.Failed{
+		UriBuilder ub = UriBuilder.fromUri(n.addr);
+		URI addPath = ub.queryParam("key", k).queryParam("val", v).build();
+		info("client addBinding(" + addPath + ")");
+		Response response = putRequest(addPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("PUT /dht");
+		}
+	}
+	
+	public void delete(NodeInfo n, String k, String v) throws DHTBase.Failed{
+		UriBuilder ub = UriBuilder.fromUri(n.addr);
+		URI delPath = ub.queryParam("key", k).queryParam("val", v).build();
+		info("client delete(" + delPath + ")");
+		Response response = delRequest(delPath);
+		if(response == null || response.getStatus() >= 300) {
+			throw new DHTBase.Failed("DEL /dht");
 		}
 	}
 

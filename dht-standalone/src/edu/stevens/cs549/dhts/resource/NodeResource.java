@@ -7,6 +7,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -19,8 +20,6 @@ public class NodeResource {
 
 	/*
 	 * Web service API.
-	 * 
-	 * TODO: Fill in the missing operations.
 	 */
 
 	Logger log = Logger.getLogger(NodeResource.class.getCanonicalName());
@@ -51,6 +50,13 @@ public class NodeResource {
 	public Response getPred() {
 		return new NodeService(headers, uriInfo).getPred();
 	}
+	
+	@GET
+	@Path("succ")
+	@Produces("application/xml")
+	public Response getSucc() {
+		return new NodeService(headers, uriInfo).getSucc();
+	}
 
 	@PUT
 	@Path("notify")
@@ -67,12 +73,36 @@ public class NodeResource {
 		// NodeInfo p = predDb.getInfo();
 	}
 
+	@PUT
+	public Response putKeyValue(@QueryParam("key") String k, @QueryParam("val") String v) {
+		return new NodeService(headers, uriInfo).add(k, v);
+	}
+	
+	@DELETE
+	public Response delKeyValue(@QueryParam("key") String k, @QueryParam("val") String v) {
+		return new NodeService(headers, uriInfo).del(k, v);
+	}
+	
+	@GET
+	@Produces("application/json")
+	public Response getKeyValue(@QueryParam("key") String k) {
+		return new NodeService(headers, uriInfo).get(k);
+	}
+	
 	@GET
 	@Path("find")
 	@Produces("application/xml")
 	public Response findSuccessor(@QueryParam("id") String index) {
 		int id = Integer.parseInt(index);
 		return new NodeService(headers, uriInfo).findSuccessor(id);
+	}
+	
+	@GET
+	@Path("finger")
+	@Produces("application/xml")
+	public Response findFinger(@QueryParam("id") String index) {
+		int id = Integer.parseInt(index);
+		return new NodeService(headers, uriInfo).findPreceedFinger(id);
 	}
 
 }

@@ -1,0 +1,7 @@
+scp -i /c/Users/ellio/Google\ Drive/Stevens/stevens.pem ./test ec2-user@ec2-18-222-183-193.us-east-2.compute.amazonaws.com:~/
+
+sudo yum install java-1.8.0-openjdk
+
+./ftp.sh --clientIp ec2-3-19-243-156.us-east-2.compute.amazonaws.com --serverAddr ec2-18-222-183-193.us-east-2.compute.amazonaws.com --serverPort 5050
+
+./ftpd.sh --serverIp ec2-18-222-183-193.us-east-2.compute.amazonaws.com
