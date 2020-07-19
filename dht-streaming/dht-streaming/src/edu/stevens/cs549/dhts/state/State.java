@@ -14,8 +14,10 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.media.sse.EventListener;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.EventSource;
+import org.glassfish.jersey.media.sse.InboundEvent;
 import org.glassfish.jersey.media.sse.OutboundEvent;
 import org.glassfish.jersey.media.sse.SseBroadcaster;
 
@@ -23,6 +25,7 @@ import edu.stevens.cs549.dhts.activity.DHTBase;
 import edu.stevens.cs549.dhts.activity.IDHTNode;
 import edu.stevens.cs549.dhts.activity.NodeInfo;
 import edu.stevens.cs549.dhts.resource.TableRep;
+import edu.stevens.cs549.dhts.resource.TableRow;
 
 /**
  * 
@@ -106,7 +109,9 @@ public class State implements IState, IRouting {
 	 * Successor: Extract the bindings from the successor node.
 	 */
 	public synchronized TableRep extractBindings(int predId) {
-		return Persist.extractBindings(predId, info, successor, dict);
+		TableRep tr = Persist.extractBindings(predId, info, successor, dict);
+		broadcastBindingChange(tr.entry, predecessor);
+		return tr;
 	}
 
 	public synchronized TableRep extractBindings() {
@@ -118,6 +123,7 @@ public class State implements IState, IRouting {
 	 */
 	public synchronized void dropBindings(int predId) {
 		Persist.dropBindings(dict, predId, getNodeInfo().id);
+		//broadcastBindingChange(dict);
 	}
 
 	/*
@@ -274,10 +280,11 @@ public class State implements IState, IRouting {
 		}
 	}
 	
+
 	/*
 	 * Server-side listeners for new bindings.
 	 */
-	//          key?
+	//          key
 	private Map<String,SseBroadcaster> listeners = new HashMap<String,SseBroadcaster>();
 	
 	//          client id.  key.   event.
@@ -325,7 +332,7 @@ public class State implements IState, IRouting {
 	}
 	
 	private void broadcastAddition(String key, String value) {
-		// TODO broadcast an added binding (use IDHTNode.NEW_BINDING_EVENT for event name).
+		// TODO broadcast an added binding (use IDHTNode.NEW_BINDING_EVENT for event name).		
 		final OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
 		eventBuilder.name(IDHTNode.NEW_BINDING_EVENT);
 		eventBuilder.data(String.class, value);
@@ -336,6 +343,22 @@ public class State implements IState, IRouting {
 			return;
 		}
 		broadcaster.broadcast(event);
+	}
+	
+	private void broadcastBindingChange(TableRow[] entry, NodeInfo predecessor) {
+		for(TableRow table : entry) {
+			//Check if broadcaster exists
+			SseBroadcaster broadcaster = listeners.get(table.key);
+			if(broadcaster != null) {
+				final OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+				eventBuilder.name(IDHTNode.BINDING_MOVED_EVENT);
+				eventBuilder.data(String.class, Integer.toString(predecessor.id) + "," + predecessor.addr);
+				final OutboundEvent event = eventBuilder.build();
+				broadcaster.broadcast(event);
+				broadcaster.closeAll();
+				listeners.remove(table.key);
+			}
+		}
 	}
 	
 	/*

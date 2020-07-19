@@ -2,11 +2,13 @@ package edu.stevens.cs549.dhts.state;
 
 import java.io.IOException;
 
+import org.glassfish.jersey.media.sse.EventListener;
 import org.glassfish.jersey.media.sse.EventOutput;
 import org.glassfish.jersey.media.sse.EventSource;
 
 import edu.stevens.cs549.dhts.activity.NodeInfo;
 import edu.stevens.cs549.dhts.resource.TableRep;
+import edu.stevens.cs549.dhts.resource.TableRow;
 
 /*
  * The interface for a state server that maintains the

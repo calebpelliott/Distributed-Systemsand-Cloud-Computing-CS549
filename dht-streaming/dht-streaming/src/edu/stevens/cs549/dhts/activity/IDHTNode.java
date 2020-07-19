@@ -47,10 +47,14 @@ public interface IDHTNode {
 	 */
 	public final static String NEW_BINDING_EVENT = "new-binding";
 	
+	public final static String BINDING_MOVED_EVENT = "binding-moved";
+	
 	public void listenOn(String key, EventListener listener) throws Failed;
 	
 	public void listenOff(String key) throws Failed;
 	
 	public void listeners();
+
+	public void keyMoved(String key, NodeInfo newNode, EventListener eventListener);
 	
 }

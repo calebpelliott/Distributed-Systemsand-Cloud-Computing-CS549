@@ -13,11 +13,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
+import javax.ws.rs.core.UriBuilder;
+
 import org.glassfish.jersey.media.sse.EventListener;
 import org.glassfish.jersey.media.sse.InboundEvent;
 
 import edu.stevens.cs549.dhts.activity.DHT;
 import edu.stevens.cs549.dhts.activity.DHTBase;
+import edu.stevens.cs549.dhts.activity.DHTBase.Failed;
 import edu.stevens.cs549.dhts.activity.IDHTBackground;
 import edu.stevens.cs549.dhts.activity.IDHTNode;
 import edu.stevens.cs549.dhts.activity.NodeInfo;
@@ -128,11 +131,20 @@ public class CliClient {
 
 	}
 	
-	protected EventListener listener(final String key) {
+	protected EventListener listener(final String key, final IDHTNode node) {
 		return new EventListener() {
 	        @Override
 	        public void onEvent(InboundEvent ev) {
-	            msgln(String.format("** Binding event (%s): %s -> %s", ev.getName(), key, ev.readData(String.class)));
+	        	if (ev.getName().equals(IDHTNode.NEW_BINDING_EVENT)){
+	        		msgln(String.format("** Binding event (%s): %s -> %s", ev.getName(), key, ev.readData(String.class)));
+	        	}
+	        	else if (ev.getName().equals(IDHTNode.BINDING_MOVED_EVENT)) {
+	        		String[] data = ev.readData(String.class).split(",");
+	        		NodeInfo newNode = new NodeInfo(Integer.parseInt(data[0]), UriBuilder.fromUri(data[1]).build());
+
+ 	        		msgln(String.format("** Binding event (%s): key %s -> %s", ev.getName(), key, Integer.toString(newNode.id)));
+	        		node.keyMoved(key, newNode, this);
+	        	}
 	        }
 	    };
 	}
@@ -342,7 +354,7 @@ public class CliClient {
 		public void listenOn(String[] inputs) {
 			if (inputs.length == 2)
 				try {
-					node.listenOn(inputs[1], listener(inputs[1]));
+					node.listenOn(inputs[1], listener(inputs[1], node));
 				} catch (Exception e) {
 					err(e);
 				}

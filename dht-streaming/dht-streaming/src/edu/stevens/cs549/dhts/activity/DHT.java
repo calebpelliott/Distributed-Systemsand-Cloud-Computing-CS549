@@ -346,6 +346,10 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			 * their bindings (this was sent as an argument in notify()).
 			 */
 			TableRep db = transferBindings(cand.id);
+			
+			//TODO notify any listeners of keys to close stream then close server side EventOutput
+			//state.broadcastBindingChange(db.entry);
+			
 			// Back up predecessor bindings. Might be used in future assignment.
 			state.backupBindings(predDb);
 			debug("Transferring bindings to node id=" + cand.id);
@@ -390,7 +394,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 	 */
 	protected TableRep transferBindings(int predId) {
 		TableRep db = state.extractBindings(predId);
-		state.dropBindings(predId);
+		state.dropBindings(predId);		
 		return db;
 	}
 
@@ -430,6 +434,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		for (int i = 0; i < ntimes; i++) {
 			fixFinger();
 		}
+		
 	}
 
 	/*
@@ -685,11 +690,20 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 */
 		int id = NodeKey(key);
 		NodeInfo node = this.findSuccessor(id);
+		System.out.println("Successor found for key: " + key + "->" + node.id);
 		EventSource es = client.listenForBindings(node, this.info.id, key);
 		es.register(listener);
 		state.addCallback(key, es);
 
 	}
+	
+	public void listenOn(String key, NodeInfo newNode, EventListener listener) throws DHTBase.Failed {
+		System.out.println("Successor found for key: " + key + "->" + newNode.id);
+		EventSource es = client.listenForBindings(newNode, this.info.id, key);
+		es.register(listener);
+		state.addCallback(key, es);
+	}
+	
 	
 	public void listenOff(String key) throws DHTBase.Failed {
 		/*
@@ -702,6 +716,17 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		client.listenOff(node, this.info.id, key);
 		state.removeCallback(key);
 
+	}
+	
+	public void keyMoved(String key, NodeInfo newNode, EventListener eventListener) {
+		state.removeCallback(key);	
+		
+		try {
+			listenOn(key, newNode, eventListener);
+		} catch (Failed e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void listeners() {
