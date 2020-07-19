@@ -85,6 +85,7 @@ public class State implements IState, IRouting {
 		}
 		vl.add(v);
 		// TODO: broadcast an event to any listeners
+		this.broadcastAddition(k, v);
 	}
 
 	public synchronized void delete(String k, String v) {
@@ -181,22 +182,30 @@ public class State implements IState, IRouting {
 
 	public synchronized void setFinger(int i, NodeInfo info) {
 		/*
-		 * TODO: Set the ith finger.
+		 * Set the ith finger.
 		 */
+		finger[i] = info;
 	}
 
 	public synchronized NodeInfo getFinger(int i) {
 		/*
-		 * TODO: Get the ith finger.
+		 * Get the ith finger.
 		 */
+		return finger[i];
 	}
 
 	public synchronized NodeInfo closestPrecedingFinger(int id) {
 		/*
-		 * TODO: Get closest preceding finger for id, to continue search at that
-		 * node. Hint: See DHTBase.inInterval()
+		 * Get closest preceding finger for id, to continue search at that
+		 * node.
 		 */
-		return null;
+		for (int i = 0; i < IRouting.NFINGERS; i++) {
+			if (DHTBase.inInterval(id, finger[i].id, finger[(i + 1) % (IRouting.NFINGERS)].id)) {
+				return getFinger(i);
+			}
+		}
+		
+		return getFinger(IRouting.NFINGERS - 1);
 	}
 
 	public synchronized void routes() {
@@ -268,17 +277,65 @@ public class State implements IState, IRouting {
 	/*
 	 * Server-side listeners for new bindings.
 	 */
-	
+	//          key?
 	private Map<String,SseBroadcaster> listeners = new HashMap<String,SseBroadcaster>();
 	
+	//          client id.  key.   event.
 	private Map<Integer,Map<String,EventOutput>> outputs = new HashMap<Integer,Map<String,EventOutput>>();
 	
 	public void removeListener(int id, String key) {
-		// TODO Close the event output stream.
+		SseBroadcaster broadcaster = listeners.get(key);
+		EventOutput eo = outputs.get(id).get(key);
+		if((broadcaster == null) || (eo == null)) {
+			return;
+		}
+		
+		broadcaster.remove(outputs.get(id).get(key));
+		
+		/*try {
+			eo.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		outputs.remove(id);*/
+	}
+	
+	public void addListener(int id, String key, EventOutput os) {
+		//TODO fix logic
+		SseBroadcaster broadcaster = listeners.get(key);
+		if(broadcaster == null) {
+			broadcaster = new SseBroadcaster();
+			listeners.put(key, broadcaster);
+		}
+		broadcaster.add(os);
+		
+		Map<String,EventOutput> m = outputs.get(id);
+		if(m == null) {
+			outputs.put(id, (Map<String, EventOutput>) new HashMap<String,EventOutput>());
+			outputs.get(id).put(key, os);
+		}
+		else {
+			m.put(key, os);
+		}
+		
+		//m.put(key, os);
+		//outputs.put(id, m);
 	}
 	
 	private void broadcastAddition(String key, String value) {
 		// TODO broadcast an added binding (use IDHTNode.NEW_BINDING_EVENT for event name).
+		final OutboundEvent.Builder eventBuilder = new OutboundEvent.Builder();
+		eventBuilder.name(IDHTNode.NEW_BINDING_EVENT);
+		eventBuilder.data(String.class, value);
+		final OutboundEvent event = eventBuilder.build();
+		
+		SseBroadcaster broadcaster = listeners.get(key);
+		if(broadcaster == null) {
+			return;
+		}
+		broadcaster.broadcast(event);
 	}
 	
 	/*
@@ -289,12 +346,19 @@ public class State implements IState, IRouting {
 	
 	public void addCallback(String key, EventSource is) {
 		removeCallback(key);
+		//is.open();
 		callbacks.put(key, is);
 	}
 	
 	public void removeCallback(String key) {
 		// TODO remove an existing callback (if any) for bindings on key.
 		// Be sure to close the event stream from the broadcaster.
+		EventSource es = callbacks.get(key);
+		if(es != null)
+		{
+			es.close();
+			callbacks.remove(key);
+		}
 	}
 	
 	public void listCallbacks() {
@@ -314,4 +378,7 @@ public class State implements IState, IRouting {
 		}
 		wr.flush();
 	}
+
+
+	
 }

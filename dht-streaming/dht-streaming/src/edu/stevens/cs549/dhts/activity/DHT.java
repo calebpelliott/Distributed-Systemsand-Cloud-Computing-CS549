@@ -1,13 +1,16 @@
 package edu.stevens.cs549.dhts.activity;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.media.sse.EventListener;
 import org.glassfish.jersey.media.sse.EventOutput;
+import org.glassfish.jersey.media.sse.EventSource;
 
+import edu.stevens.cs549.dhts.activity.DHTBase.Failed;
 import edu.stevens.cs549.dhts.main.Main;
 import edu.stevens.cs549.dhts.main.WebClient;
 import edu.stevens.cs549.dhts.resource.TableRep;
@@ -115,8 +118,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		if (localInfo.addr.equals(info.addr)) {
 			return getSucc();
 		} else {
-			// TODO: Do the Web service call
-			return null;
+			return client.getSucc(info);			
 		}
 	}
 
@@ -148,10 +150,8 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		if (localInfo.addr.equals(info.addr)) {
 			return getPred();
 		} else {
-			/*
-			 * TODO: Do the Web service call
-			 */
-			return null;
+			return client.getPred(info);
+			
 		}
 	}
 
@@ -181,10 +181,8 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 			return closestPrecedingFinger(id);
 		} else {
 			if (IRouting.USE_FINGER_TABLE) {
-				/*
-				 * TODO: Do the Web service call to the remote node.
-				 */
-				return null;
+				return client.closestPrecedingFinger(info, id);
+				
 			} else {
 				/*
 				 * Without finger tables, just use the successor pointer.
@@ -468,10 +466,8 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		} else {
 			/*
 			 * Retrieve the bindings at the specified node.
-			 * 
-			 * TODO: Do the Web service call.
 			 */
-			return null;
+			return client.get(n, k);
 		}
 	}
 
@@ -495,9 +491,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 				throw new IllegalArgumentException(e);
 			}
 		} else {
-			/*
-			 * TODO: Do the Web service call.
-			 */
+			client.addBinding(n, k, v);
 		}
 	}
 
@@ -547,9 +541,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 				throw new IllegalArgumentException(e);
 			}
 		} else {
-			/*
-			 * TODO: Do the Web service call.
-			 */
+			client.delete(n, k, v);
 		}
 	}
 
@@ -634,6 +626,16 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 * that it keeps its own bindings, to which it adds those it transfers
 		 * from us.
 		 */
+		state.clear();
+		try {
+			succ = findSuccessor(new URI(uri), info.id);
+			setSucc(succ);
+			stabilize();
+		} catch (Failed e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*
@@ -655,7 +657,7 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 	public EventOutput listenForBindings(int id, String key) {
 		// TODO create event output stream and add to broadcaster
 		EventOutput os = new EventOutput();
-		debug("listforBindings("+key+")");
+		debug("listenForBindings("+key+")");
 		state.addListener(id, key, os);
 		return os;
 	}
@@ -663,6 +665,9 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 	// Webmethod
 	public void stopListening(int id, String key) {
 		// TODO remove event output stream from broadcaster
+		debug("stopListening(" + key + ")");
+		state.removeListener(id, key);
+		
 	}
 		
 	/*
@@ -678,6 +683,11 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 * and key).  The client should send its own node id to identify itself
 		 * (for both the listen on and listen off requests).
 		 */
+		int id = NodeKey(key);
+		NodeInfo node = this.findSuccessor(id);
+		EventSource es = client.listenForBindings(node, this.info.id, key);
+		es.register(listener);
+		state.addCallback(key, es);
 
 	}
 	
@@ -687,6 +697,10 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 * do a Web service call to the server node, to stop event generation,
 		 * as well as close the event source here at the client.
 		 */
+		int id = NodeKey(key);
+		NodeInfo node = this.findSuccessor(id);
+		client.listenOff(node, this.info.id, key);
+		state.removeCallback(key);
 
 	}
 	
@@ -694,6 +708,4 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		state.listCallbacks();
 	}
 
-
-	
 }

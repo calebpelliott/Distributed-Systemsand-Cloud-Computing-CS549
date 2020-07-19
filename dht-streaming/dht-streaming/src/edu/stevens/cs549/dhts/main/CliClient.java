@@ -17,6 +17,7 @@ import org.glassfish.jersey.media.sse.EventListener;
 import org.glassfish.jersey.media.sse.InboundEvent;
 
 import edu.stevens.cs549.dhts.activity.DHT;
+import edu.stevens.cs549.dhts.activity.DHTBase;
 import edu.stevens.cs549.dhts.activity.IDHTBackground;
 import edu.stevens.cs549.dhts.activity.IDHTNode;
 import edu.stevens.cs549.dhts.activity.NodeInfo;
@@ -111,6 +112,8 @@ public class CliClient {
 						d.listeners(inputs);
 					else if ("help".equals(cmd))
 						d.help(inputs);
+					else if ("key".equals(cmd))
+						d.key(inputs);
 					else if ("quit".equals(cmd))
 						return;
 					else
@@ -166,6 +169,7 @@ public class CliClient {
 				msgln("  listenOn key: request notification of a change in binding for this key");
 				msgln("  listenOff key: disable any further notifications for this key");
 				msgln("  listeners: keys for which listeners are defined");
+				msgln("  key: hash value for given key");
 				
 				msgln("  quit: exit the client");
 			}
@@ -228,6 +232,16 @@ public class CliClient {
 				}
 			else
 				msgln("Usage: add <key> <value>");
+		}
+		
+		public void key(String[] inputs) {
+			if (inputs.length == 2)
+			{
+				int hash = DHTBase.NodeKey(inputs[1]);
+				msgln("Hash of " + inputs[1] + ": " + hash);
+			}
+			else
+				msgln("Usage: key <key>");
 		}
 
 		public void delete(String[] inputs) {

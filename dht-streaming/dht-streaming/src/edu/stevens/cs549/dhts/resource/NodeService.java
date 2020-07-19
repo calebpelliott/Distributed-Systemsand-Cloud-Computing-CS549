@@ -1,5 +1,6 @@
 package edu.stevens.cs549.dhts.resource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
@@ -77,6 +78,11 @@ public class NodeService {
 	private Response response(TableRow r) {
 		return Response.ok(tableRowRep(r)).header(Time.TIME_STAMP, Time.advanceTime()).build();
 	}
+	
+	private Response response(String[] s) {
+		List<String> list = Arrays.asList(s);
+		return Response.ok(list.toString()).header(Time.TIME_STAMP, Time.advanceTime()).build();
+	}
 
 	private Response responseNull() {
 		return Response.notModified().header(Time.TIME_STAMP, Time.advanceTime()).build();
@@ -101,6 +107,12 @@ public class NodeService {
 		info("getPred()");
 		return response(dht.getPred());
 	}
+	
+	public Response getSucc() {
+		advanceTime();
+		info("getSucc()");
+		return response(dht.getSucc());
+	}
 
 	public Response notify(TableRep predDb) {
 		advanceTime();
@@ -110,6 +122,46 @@ public class NodeService {
 			return responseNull();
 		} else {
 			return response(db);
+		}
+	}
+	
+	public Response add(String k, String v) {
+		advanceTime();
+		info("add()");
+		try {
+			dht.add(k, v);
+			return response();
+		} catch (Invalid e) {
+			e.printStackTrace();
+			return responseNull();
+		}
+	}
+	
+	public Response del(String k, String v) {
+		advanceTime();
+		info("del()");
+		try {
+			dht.delete(k, v);
+			return response();
+		} catch (Invalid e) {
+			e.printStackTrace();
+			return responseNull();
+		}
+	}
+	
+	public Response get(String k) {
+		advanceTime();
+		info("get()");
+		try {
+			String[] bindings = dht.get(k);
+			if (bindings == null) {
+				return responseNull();
+			}else {
+				return response(bindings);
+			}
+		} catch (Invalid e) {
+			e.printStackTrace();
+			return responseNull();
 		}
 	}
 
@@ -127,6 +179,22 @@ public class NodeService {
 		} catch (Failed e) {
 			throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
 		}
+	}
+	
+	public Response findPreceedFinger(int id) {
+		advanceTime();
+		info("findPreceedFinger()");
+		return response(dht.closestPrecedingFinger(id));
+	}
+
+	public void stopListening(int id, String key) {
+		info("stopListening()");
+		dht.stopListening(id, key);
+	}
+	
+	public EventOutput listenForBindings(int id, String key) {
+		info("listenForBindings()");
+		return dht.listenForBindings(id, key);
 	}
 	
 }
