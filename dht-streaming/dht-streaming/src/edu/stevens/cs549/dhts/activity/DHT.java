@@ -690,7 +690,6 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 		 */
 		int id = NodeKey(key);
 		NodeInfo node = this.findSuccessor(id);
-		System.out.println("Successor found for key: " + key + "->" + node.id);
 		EventSource es = client.listenForBindings(node, this.info.id, key);
 		es.register(listener);
 		state.addCallback(key, es);
@@ -698,7 +697,6 @@ public class DHT extends DHTBase implements IDHTResource, IDHTNode, IDHTBackgrou
 	}
 	
 	public void listenOn(String key, NodeInfo newNode, EventListener listener) throws DHTBase.Failed {
-		System.out.println("Successor found for key: " + key + "->" + newNode.id);
 		EventSource es = client.listenForBindings(newNode, this.info.id, key);
 		es.register(listener);
 		state.addCallback(key, es);
