@@ -19,7 +19,12 @@ public class DiffMap1 extends Mapper<LongWritable, Text, Text, Text> {
 		/**
 		 *  TODO: read node-rank pair and emit: key:node, value:rank
 		 */
-
+		String currentNode = sections[0].split(" ")[0];
+		String currentWeight = sections[0].split(" ")[1];
+		currentWeight = currentWeight.replace("[", "");
+		currentWeight = currentWeight.replace("]", "");
+		
+		context.write(new Text(currentNode), new Text(currentWeight));
 	}
 
 }
