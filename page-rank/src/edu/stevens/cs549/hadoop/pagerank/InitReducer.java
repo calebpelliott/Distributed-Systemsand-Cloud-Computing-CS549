@@ -12,6 +12,10 @@ public class InitReducer extends Reducer<Text, Text, Text, Text> {
 		/* 
 		 * TODO: Output key: node+rank, value: adjacency list
 		 */
+		for(Text adjList : values)
+		{
+			context.write(new Text(key + " [1]"), adjList);
+		}
 
 	}
 }

@@ -208,7 +208,7 @@ public class PageRankDriver {
 		/*
 		 * TODO 
 		 */
-		System.out.println("Your Name (your Stevens id)");
+		System.out.println("Caleb Elliott (10458491)");
 		
 		int counter = 0;
 		init(input, interim1, reducers); // Initializes data

@@ -16,8 +16,11 @@ public class InitMapper extends Mapper<LongWritable, Text, Text, Text> {
 		/* 
 		 * TODO: Just echo the input, since it is already in adjacency list format.
 		 */
-
-
+		String[] values = line.split(":");
+		String nodeId = values[0];
+		String edgeNodes = values[1].trim();
+		
+		context.write(new Text(nodeId), new Text(edgeNodes));
 	}
 
 }
