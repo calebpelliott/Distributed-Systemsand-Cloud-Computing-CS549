@@ -16,7 +16,6 @@ public class DiffMap2 extends Mapper<LongWritable, Text, Text, Text> {
 		 * TODO: emit: key:"Difference" value:difference calculated in DiffRed1
 		 */
 		context.write(new Text("Difference"), new Text(diff));
-
 	}
 
 }

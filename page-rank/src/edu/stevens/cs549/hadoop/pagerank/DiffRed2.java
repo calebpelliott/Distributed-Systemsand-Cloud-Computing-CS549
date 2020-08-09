@@ -21,7 +21,7 @@ public class DiffRed2 extends Reducer<Text, Text, Text, Text> {
 			}
 		}
 		
-		context.write(new Text("Max diff"), new Text(Double.toString(diff_max)));
+		context.write(new Text(), new Text(Double.toString(diff_max)));
 	}
 	
 	private List<Double> textToDoubleList(Iterable<Text> values) {

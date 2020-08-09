@@ -13,6 +13,8 @@ public class FinReducer extends Reducer<DoubleWritable, Text, Text, Text> {
 		/* 
 		 * TODO: For each value, emit: key:value, value:-rank
 		 */
-
+		for(Text value: values) {
+			context.write(new Text(key.toString()), value);
+		}
 	}
 }

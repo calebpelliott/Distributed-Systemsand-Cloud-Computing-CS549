@@ -209,6 +209,8 @@ public class PageRankDriver {
 		 * TODO 
 		 */
 		System.out.println("Caleb Elliott (10458491)");
+		//REMOVE
+		deleteDirectory("diffout"); // deletes diffout
 		
 		int counter = 0;
 		init(input, interim1, reducers); // Initializes data
@@ -219,6 +221,7 @@ public class PageRankDriver {
 		{
 			if (i % 2 == 0) {
 				iter(interim1, interim2, reducers); 
+				
 				/*
 				 * or every even iteration, interim1 is the input and interim2 the output
 				 */
@@ -400,7 +403,9 @@ public class PageRankDriver {
 		FileSystem fs = FileSystem.get(URI.create(path), conf);
 
 		if (fs.exists(todelete))
+		{
 			fs.delete(todelete, true);
+		}
 
 		fs.close();
 	}

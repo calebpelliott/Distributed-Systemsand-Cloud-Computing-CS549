@@ -13,19 +13,27 @@ public class DiffRed1 extends Reducer<Text, Text, Text, Text> {
 		double[] ranks = new double[2];
 		
 		//Convert and Validate input
+		String node = key.toString();
 		List<String> input = textToStringList(values);
-		if(input.size() != 2)
+		double absDiff = 0.0;
+		if(input.size() == 1) {
+			absDiff = Double.parseDouble(input.get(0));
+		}
+		else if(input.size() == 2)
 		{
+			ranks[0] = Double.parseDouble(input.get(0));
+			ranks[1] = Double.parseDouble(input.get(1));
+			absDiff = Math.abs(ranks[0] - ranks[1]);
+		}
+		else {
 			throw new IOException("Incorrect data format");
 		}
 		
-		ranks[0] = Double.parseDouble(input.get(0));
-		ranks[1] = Double.parseDouble(input.get(1));
+		
 		
 		/* 
 		 * TODO: The list of values should contain two ranks.  Compute and output their difference.
 		 */
-		double absDiff = Math.abs(ranks[0] - ranks[1]);
 		context.write(key, new Text(Double.toString(absDiff)));
 	}
 	
