@@ -51,7 +51,12 @@ public class PageRankDriver {
 			{
 				diff(args[1], args[2], args[3], Integer.parseInt(args[4])); 
 				// Parses data to diff
-			} else // In case the function name doesn't match up
+			}
+			else if(job.equals("names"))
+			{
+				names(args[1], args[2], args[3], Integer.parseInt(args[4]));
+			}
+			else // In case the function name doesn't match up
 			{
 				System.err
 						.println("Please check the name of the function you wish to call and try again");
@@ -126,6 +131,49 @@ public class PageRankDriver {
 		// Prints message on successful completion or in case of an error
 		System.out.print(job.waitForCompletion(true) ? "Iter Job Completed" : "Iter Job Error");
 
+	}
+	
+	static void names(String input1, String input2, String output, int reducers)
+			throws Exception {
+		System.out.println("Name Job Part 1 Started");
+		Job job = Job.getInstance(); // Creates a new job
+		job.setJarByClass(PageRankDriver.class); // Sets Driver Class
+		job.setNumReduceTasks(reducers); // Sets number of reducers
+		
+		FileInputFormat.addInputPath(job, new Path(input1)); // Adds input from one interim output
+		FileInputFormat.addInputPath(job, new Path(input2)); // Adds input from another interim output
+		FileOutputFormat.setOutputPath(job, new Path(output + "/tmp")); // Adds a temporary output folder "tempdiff"
+		
+		job.setMapperClass(NameMap.class); // Sets Mapper and Reducer class for first job
+		job.setReducerClass(NameRed.class);
+
+		job.setMapOutputKeyClass(Text.class); // Sets output classes for Mapper and Reducers for Job 1
+		job.setMapOutputValueClass(Text.class);
+
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+		
+		if(job.waitForCompletion(true)) {
+			System.out.println("Name Job Part 1 Complete, Part 2 Started");
+			Job job1 = Job.getInstance(); // Creates a new second job
+			job1.setJarByClass(PageRankDriver.class); // Sets driver class and number of reducers
+			job1.setNumReduceTasks(reducers);
+			
+			FileInputFormat.addInputPath(job1, new Path(output + "/tmp")); // Adds input from one interim output
+			FileOutputFormat.setOutputPath(job1, new Path(output + "/fin")); // Adds a temporary output folder "tempdiff"
+			
+			job1.setMapperClass(FinNameMapper.class); // Sets Mapper and Reducer Classes
+			job1.setReducerClass(FinReducer.class);
+
+			job1.setMapOutputKeyClass(DoubleWritable.class); // Sets Mapper and Reducer output types
+			job1.setMapOutputValueClass(Text.class);
+
+			job1.setOutputKeyClass(Text.class);
+			job1.setOutputValueClass(Text.class);
+
+			// Prints message on successful completion or error.
+			System.out.print(job1.waitForCompletion(true) ? "Finish Job Completed" : "Finish Job Error");
+		}
 	}
 
 	static void diff(String input1, String input2, String output, int reducers)
@@ -209,8 +257,6 @@ public class PageRankDriver {
 		 * TODO 
 		 */
 		System.out.println("Caleb Elliott (10458491)");
-		//REMOVE
-		deleteDirectory("diffout"); // deletes diffout
 		
 		int counter = 0;
 		init(input, interim1, reducers); // Initializes data
